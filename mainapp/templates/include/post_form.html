@@ -1,0 +1,14 @@
+{% include "include/post_snippet.html" with post=post%} {% if post.repost_id %}
+<div class="d-grid justify-content-center align-items-center">
+  <p class="fs-4">Re: "{{ post.repost_id.post_content }}"</p>
+  <p class="fs-5 fw-semibold">
+    <!-- prettier-ignore -->
+    - {{ post.repost_id.poster_id.display_name}}@{{post.poster_id.username}}
+  </p>
+</div>
+{% endif %}
+
+<!-- prettier-ignore -->
+{% for repost in post.repost.all %}
+    {% include "include/post_snippet.html" with post=repost %}
+{% endfor %}

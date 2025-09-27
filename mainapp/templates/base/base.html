@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}LCDI Test{% endblock %}</title>
+    {% load static %}
+
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/leaflet.css' %}" />
+
+    <script src="{% static 'js/leaflet.js' %}"></script>
+
+    {% block custom_style %}{% endblock %}
+    <style>
+      body {
+        background-color: #ddd;
+      }
+    </style>
+  </head>
+
+  <body class="{% block center_body %}{% endblock %}">
+    <div>{% block content %}{% endblock %}</div>
+
+    <script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+
+    <script>
+      function likeBtnFunc(element) {
+        const postId = element.getAttribute("data-id");
+        fetch(`/post/${postId}/like/`, {
+          method: "POST",
+          headers: {
+            "X-CSRFToken": "{{ csrf_token }}",
+            "X-Requested-With": "XMLHttpRequest",
+          },
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            document.getElementById(`${postId}-like-count`).textContent =
+              data.total_likes + " likes";
+          });
+      }
+
+      function repostBtnFunc(element) {
+        const postId = element.getAttribute("data-id");
+
+        const repostDiv = document.getElementById(`${postId}-repost-div`);
+
+        repostDiv.style.display =
+          repostDiv.style.display == "none" ? "block" : "none";
+      }
+
+      function showMapFunc(element) {
+        const postId = element.getAttribute("data-id");
+
+        const latEl = document.getElementById(`lat_${postId}`);
+        const lonEl = document.getElementById(`lon_${postId}`);
+
+        document.getElementById(postId).style.display = "block";
+
+        let map = L.map(postId).setView([51.505, -0.09], 13);
+        L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          maxZoom: 19,
+          attribution:
+            '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        }).addTo(map);
+
+        let marker = {};
+
+        function latLongValueEdit(lat = null, lon = null) {
+          latEl.value = lat;
+          lonEl.value = lon;
+        }
+
+        function removeMarker() {
+          if (marker != undefined) {
+            map.removeLayer(marker);
+          }
+          latLongValueEdit();
+        }
+
+        function onMapClick(e) {
+          let lat = e.latlng.lat;
+          let lon = e.latlng.lng;
+
+          removeMarker();
+
+          marker = L.marker([lat, lon]).addTo(map);
+          latLongValueEdit(lat, lon);
+        }
+
+        map.on("click", onMapClick);
+      }
+    </script>
+  </body>
+</html>

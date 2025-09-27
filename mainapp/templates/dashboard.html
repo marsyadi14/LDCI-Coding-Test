@@ -1,0 +1,64 @@
+<!-- prettier-ignore -->
+{% extends "base/base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block center_body %} 
+d-flex justify-content-center align-items-center
+{% endblock %}
+
+{% block content %}
+
+<div class="text-bg-secondary p-4 m-2 bordered rounded rounded-lg">
+  <h1 class="mt-4 text-center">Welcome, {{request.user.display_name}}</h1>
+  <form method="post" class="d-grid justify-content-center align-items-end p-2">
+    {% csrf_token %} {{ form.post_content }}
+    <a class="btn btn-primary" data-id="mymap" onclick="showMapFunc(this);">
+      Select Location
+    </a>
+    <input type="hidden" id="lat_mymap" name="loc_lat" />
+    <input type="hidden" id="lon_mymap" name="loc_lon" />
+    <button type="submit" class="btn btn-primary mt-2" name="post">Post</button>
+  </form>
+  <div id="mymap" style="height: 200px; display: none"></div>
+</div>
+
+<div class="bg-primary p-4 m-2 bordered rounded d-flex flex-column gap-3">
+  {% for post in posts %}
+  <!-- prettier-ignore -->
+  {% include "include/post_snippet.html" with post=post %}
+
+  {% empty %} No posts available. {% endfor %}
+</div>
+
+<div
+  class="d-flex justify-content-center align-items-center m-3 px-2 py-2 text-center bg-light bordered rounded"
+>
+  {% if page_obj.has_previous %}
+  <div class="col">
+    <a href="?page={{ page_obj.previous_page_number }}">Previous</a>
+  </div>
+  {% endif %}
+
+  <div class="col">
+    <!-- prettier-ignore -->
+    {% for num in page_obj.paginator.page_range %}
+        {% if num == page_obj.number %}
+    <strong>{{ num }}</strong>
+    {% else %}
+    <a href="?page={{ num }}">{{ num }}</a>
+    {% endif %} {% endfor %}
+  </div>
+
+  {% if page_obj.has_next %}
+  <div class="col">
+    <a href="?page={{ page_obj.next_page_number }}">Next</a>
+  </div>
+  {% endif %}
+
+  <button class="btn btn-danger mx-1" onclick="location.href = '/logout';">
+    Log Out
+  </button>
+</div>
+
+{% endblock %}

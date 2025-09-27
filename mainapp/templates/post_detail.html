@@ -1,0 +1,14 @@
+<!-- prettier-ignore -->
+{% extends "base/base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block center_body %} 
+d-flex justify-content-center align-items-center
+{% endblock %}
+
+{% block content %}
+
+{% include "include/post_form.html" with post=post %}
+
+{% endblock %}

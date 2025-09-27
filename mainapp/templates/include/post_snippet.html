@@ -1,0 +1,72 @@
+<div class="p-2 bg-primary-subtle bordered rounded rounded-lg col">
+  <p class="fs-4">"{{ post.post_content }}"</p>
+  <p class="fs-5 fw-semibold">
+    - {{ post.poster_id.display_name }}@{{ post.poster_id.username }}
+  </p>
+  <p>Created at: {{ post.created_at }}</p>
+
+  {% if post.loc_lat %}
+  <p>Latitude: {{ post.loc_lat }}</p>
+  {% endif %} {% if post.loc_lon %}
+  <p>Longitude: {{ post.loc_lon }}</p>
+  {% endif %}
+
+  <div
+    class="d-flex justify-content-center align-items-center mt-3 px-2 text-center"
+  >
+    <button
+      class="col like-btn btn btn-primary"
+      data-id="{{ post.post_id }}"
+      onclick="likeBtnFunc(this)"
+    >
+      <span id="{{ post.post_id }}-like-count"
+        >{{post.liker_id.count}} likes</span
+      >
+    </button>
+    <h6 class="col" id="{{ post.post_id }}-post-count">
+      {{post.repost.count}} reposts
+    </h6>
+
+    <button
+      class="col reply-btn btn btn-primary"
+      data-id="{{ post.post_id }}"
+      onclick="repostBtnFunc(this)"
+    >
+      Reply Post
+    </button>
+  </div>
+
+  <div
+    class="d-flex justify-content-center align-items-center mt-3 px-2 text-center"
+  >
+    {% if detailed_post %}
+    <button
+      class="col reply-btn btn btn-primary"
+      onclick="location.href = '/post/'"
+    >
+      Return
+    </button>
+    {% else %}
+    <button
+      class="col reply-btn btn btn-primary"
+      onclick="location.href = '/post/{{ post.post_id }}'"
+    >
+      Visit Post
+    </button>
+    {% endif %}
+  </div>
+</div>
+
+<div id="{{ post.post_id }}-repost-div" style="display: none">
+  <form
+    method="post"
+    class="d-grid justify-content-center align-items-end p-2 bg-primary-subtle bordered rounded"
+  >
+    <!-- prettier-ignore -->
+    {% csrf_token %} {{ form.post_content}}
+    <input type="hidden" name="repost_val" value="{{ post.post_id }}" />
+    <button type="submit" name="repost" class="btn btn-primary mt-2">
+      Repost
+    </button>
+  </form>
+</div>
