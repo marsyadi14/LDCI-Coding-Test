@@ -181,6 +181,26 @@ def get_post_json(request, post_id):
 
 def get_all_post_json(request):
     post_count = Post.objects.count()
+    posts_liker = Post.objects.prefetch_related("liker_id")
+    
+    posts_list = list()
+    
+    for p in posts_liker:
+        data = {
+            "post_id": p.post_id,
+            "post_content": p.post_content,
+            "loc_lon": p.loc_lon,
+            "loc_lat": p.loc_lat,
+            "created_at": p.created_at,
+            "post_status": p.post_status,
+            "liker_id": list(p.liker_id.values_list("user_id", flat=True)),
+            "poster_id": p.poster_id.user_id,
+        }
+        
+        if p.repost_id:
+            data["repost_id"] = p.repost_id.post_id
+        
+        posts_list.append(data)
     
     max_post = request.GET.get('max_post', "5")
     if not max_post.isdecimal():
@@ -200,5 +220,5 @@ def get_all_post_json(request):
     
     return JsonResponse({
         "total_post": post_count,
-        "posts": [entry for entry in Post.objects.values()[page*max_post:(page+1)*max_post]]
+        "posts": posts_list[page*max_post:(page+1)*max_post]
     })
