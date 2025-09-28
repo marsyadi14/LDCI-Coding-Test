@@ -19,25 +19,37 @@ d-flex justify-content-center align-items-center
 
 {% block content %}
 
-<div class="bg-primary-subtle p-5 bordered rounded rounded-lg">
-  <h1>Sign Up</h1>
-  <form method="post" class="d-grid gap-2">
-    {% csrf_token %} {% for field in form %}
-    <div>{{ field }}</div>
-    {% endfor %} {% if form.non_field_errors %}
-    <ul>
-      {% for error in form.non_field_errors %}
-      <li>{{ error }}</li>
+<div
+  class="bg-primary-subtle px-5 py-4 border rounded rounded-lg d-grid justify-content-center align-items-center"
+>
+  <div class="log-div">
+    <h1 class="text-center mb-3">Sign Up</h1>
+    <form method="post" class="d-grid gap-2" novalidate>
+      {% csrf_token %} {% for field in form %}
+      <div>
+        {{ field }} {% if field.errors %}
+        <!-- prettier-ignore -->
+        {% for error in field.errors %}
+        <div class="ms-1 text-danger">{{ error }}</div>
+        {% endfor %} {% endif %}
+      </div>
       {% endfor %}
-    </ul>
-    {% endif %}
-    <div class="row mt-3">
-      <button class="col btn btn-primary mx-1" onclick="location.href = '/';">
-        Return
-      </button>
-      <button type="submit" class="col btn btn-primary">Save</button>
-    </div>
-  </form>
+      <!-- prettier-ignore -->
+      {% if form.non_field_errors %}
+      <div class="alert alert-danger">
+        {% for error in form.non_field_errors %}
+        <p>{{ error }}</p>
+        {% endfor %}
+      </div>
+      {% endif %}
+      <div class="row mt-3">
+        <span class="col btn btn-primary mx-1" onclick="location.href = '/';">
+          Return
+        </span>
+        <button type="submit" class="col btn btn-primary">Sign Up</button>
+      </div>
+    </form>
+  </div>
 </div>
 
 {% endblock %}

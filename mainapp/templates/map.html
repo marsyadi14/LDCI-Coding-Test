@@ -11,8 +11,8 @@
   <p>Longitude: <span id="lon_span"></span></p>
 </div>
 <script>
-  const latEl = document.getElementById("lat_span");
-  const lonEl = document.getElementById("lon_span");
+  const latEl = $("lat_span");
+  const lonEl = $("lon_span");
 
   let map = L.map("mymap").setView([51.505, -0.09], 13);
   L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {

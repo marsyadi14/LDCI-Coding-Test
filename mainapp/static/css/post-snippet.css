@@ -1,0 +1,49 @@
+.post {
+  background-color: #fff;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
+}
+
+.post-text {
+  font-size: 1rem;
+  color: #0f1419;
+  line-height: 1.4;
+}
+
+.post .text-muted {
+  font-size: 0.875rem;
+  color: #536471 !important;
+}
+.action-bar button {
+  color: #536471;
+  font-size: 0.9rem;
+  transition: color 0.2s ease-in-out;
+}
+
+.post:hover {
+  background-color: #f7f9f9;
+}
+
+.location-btn:hover {
+  color: #323232;
+}
+.reply-btn:hover {
+  color: #1d9bf0;
+}
+.repost-btn:hover {
+  color: #17bf63;
+}
+.like-btn:hover {
+  color: #e0245e;
+}
+
+.repost-btn.active {
+  color: #17bf63;
+}
+.like-btn.active {
+  color: #e0245e;
+}
+
+.log-div {
+  width: 30vw;
+}

@@ -6,7 +6,7 @@
     <title>Post Test</title>
   </head>
   <body>
-    <form method="post">
+    <form method="post" novalidate>
       {% csrf_token %} {{ form.as_p}}
       <button type="submit">Save</button>
     </form>

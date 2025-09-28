@@ -9,6 +9,21 @@ d-flex justify-content-center align-items-center
 
 {% block content %}
 
-{% include "include/post_form.html" with post=post %}
+<div class="bg-primary p-4 m-2 border rounded d-flex flex-column gap-3">
+  <!-- prettier-ignore -->
+  {% include "include/post_snippet.html" with post=post curr_post=post.post_id%}
+
+  <button
+    class="btn btn-outline-light mx-1"
+    onclick="location.href = '/post/';"
+  >
+    Return
+  </button>
+
+  <!-- prettier-ignore -->
+  {% for repost in post.repost.all %}
+    {% include "include/post_snippet.html" with post=repost detailed_repost=True %}
+{% endfor %}
+</div>
 
 {% endblock %}

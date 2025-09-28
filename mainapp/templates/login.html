@@ -20,28 +20,37 @@ d-flex justify-content-center align-items-center
 <!-- prettier-ignore -->
 {% block content %}
 
-<div>
-  <div class="bg-primary-subtle p-5 bordered rounded rounded-lg">
-    <h1>Login</h1>
-    <form method="post" class="d-grid gap-2">
+<div
+  class="bg-primary-subtle p-5 border rounded rounded-lg d-grid justify-content-center align-items-center"
+>
+  <div class="log-div">
+    <h1 class="text-center">Login</h1>
+    <form method="post" class="d-grid gap-2" novalidate>
       {% csrf_token %} {% for field in form %}
       <div>{{ field }}</div>
-      {% endfor %} {% if form.non_field_errors %}
-      <ul>
-        {% for error in form.non_field_errors %}
-        <li>{{ error }}</li>
+      {% endfor %}
+
+      <!-- prettier-ignore -->
+      {% if form.errors %}
+      <div class="alert alert-danger">
+        {% for field, errors in form.errors.items %} {% for error in errors %}
+        <p><strong>{{ field|capfirst }}</strong>: {{ error }}</p>
+        {% endfor %} {% endfor %} {% for error in form.non_field_errors %}
+        <p>{{ error }}</p>
         {% endfor %}
-      </ul>
+      </div>
       {% endif %}
 
       <div class="row mt-3">
-        <button class="col btn btn-primary mx-1" type="submit">Login</button>
-        <button
+        <button class="col btn btn-log btn-primary mx-1" type="submit">
+          Login
+        </button>
+        <span
           class="col btn btn-primary mx-1"
           onclick="location.href = '/signup';"
         >
           Sign Up
-        </button>
+        </span>
       </div>
     </form>
   </div>

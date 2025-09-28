@@ -11,7 +11,7 @@ class Status(models.TextChoices):
 class User(AbstractUser):
     user_id = models.AutoField(primary_key=True)
     username = models.CharField(max_length=32, unique=True)
-    email = models.EmailField(max_length=255, unique=True)
+    email = models.EmailField(max_length=255)
     display_name = models.CharField(max_length=64)
     password = models.CharField(max_length=128)
     last_login = models.DateTimeField(blank=True, null=True)

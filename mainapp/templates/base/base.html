@@ -7,7 +7,13 @@
     {% load static %}
 
     <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
+    />
     <link rel="stylesheet" href="{% static 'css/leaflet.css' %}" />
+
+    <link rel="stylesheet" href="{% static 'css/post-snippet.css' %}" />
 
     <script src="{% static 'js/leaflet.js' %}"></script>
 
@@ -20,78 +26,202 @@
   </head>
 
   <body class="{% block center_body %}{% endblock %}">
-    <div>{% block content %}{% endblock %}</div>
+    <div class="w-md-50 w-sm-100">{% block content %}{% endblock %}</div>
 
     <script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
     <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
 
     <script>
-      function likeBtnFunc(element) {
-        const postId = element.getAttribute("data-id");
-        fetch(`/post/${postId}/like/`, {
-          method: "POST",
-          headers: {
-            "X-CSRFToken": "{{ csrf_token }}",
-            "X-Requested-With": "XMLHttpRequest",
-          },
-        })
-          .then((response) => response.json())
-          .then((data) => {
-            document.getElementById(`${postId}-like-count`).textContent =
-              data.total_likes + " likes";
+      function deleteMap(containerId) {
+        const container = document.getElementById(containerId);
+
+        if (container._leaflet_map) {
+          container._leaflet_map.off();
+          container._leaflet_map.remove();
+          container._leaflet_map = null;
+        }
+      }
+
+      function getOrCreateMap(containerId, options) {
+        const container = document.getElementById(containerId);
+
+        if (container._leaflet_map) {
+          deleteMap(containerId);
+        }
+
+        const map = L.map(containerId, options);
+        container._leaflet_map = map;
+
+        return map;
+      }
+
+      const switchMapButton = (postId) => {
+        $(`#select_${postId}`).toggleClass("visually-hidden");
+        $(`#close_${postId}`).toggleClass("visually-hidden");
+      };
+
+      const isNumericRegex = (str) => {
+        return /^[+-]?\d+(\.\d+)?$/.test(str);
+      };
+
+      const latLongValueEdit = (postId, lat = null, lon = null) => {
+        let isMain = "";
+        if (isNumericRegex(postId)) {
+          isMain = "mymap_";
+        }
+
+        $(`#lat_${isMain}${postId}`).val(lat);
+        $(`#lon_${isMain}${postId}`).val(lon);
+      };
+
+      $(document).ready(function () {
+        $(".map-open-btn").on("click", function () {
+          const postId = $(this).attr("data-id");
+
+          let container = document.getElementById(`peta_${postId}`);
+
+          switchMapButton(postId);
+
+          $(`#peta_${postId}`).toggleClass("visually-hidden");
+
+          let map = getOrCreateMap(`peta_${postId}`, {
+            center: [-6.2, 106.81],
+            zoom: 13,
           });
-      }
+          if (!container._leaflet_map) return;
+          L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            maxZoom: 19,
+            attribution:
+              '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+          }).addTo(map);
 
-      function repostBtnFunc(element) {
-        const postId = element.getAttribute("data-id");
+          let marker = {};
 
-        const repostDiv = document.getElementById(`${postId}-repost-div`);
+          map.on("click", (e) => {
+            let lat = e.latlng.lat;
+            let lon = e.latlng.lng;
 
-        repostDiv.style.display =
-          repostDiv.style.display == "none" ? "block" : "none";
-      }
+            if (marker != undefined) {
+              map.removeLayer(marker);
+            }
+            latLongValueEdit(postId);
 
-      function showMapFunc(element) {
-        const postId = element.getAttribute("data-id");
+            marker = L.marker([lat, lon]).addTo(map);
+            latLongValueEdit(postId, lat, lon);
+          });
+        });
 
-        const latEl = document.getElementById(`lat_${postId}`);
-        const lonEl = document.getElementById(`lon_${postId}`);
+        $(".map-close-btn").on("click", function () {
+          const postId = $(this).attr("data-id");
 
-        document.getElementById(postId).style.display = "block";
+          $(`#peta_${postId}`).toggleClass("visually-hidden");
 
-        let map = L.map(postId).setView([51.505, -0.09], 13);
-        L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-          maxZoom: 19,
-          attribution:
-            '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-        }).addTo(map);
+          switchMapButton(postId);
 
-        let marker = {};
+          deleteMap(`peta_${postId}`);
+        });
 
-        function latLongValueEdit(lat = null, lon = null) {
-          latEl.value = lat;
-          lonEl.value = lon;
-        }
+        $(".snipmap-open-btn").on("click", function () {
+          const postId = $(this).attr("data-id");
+          const lat = $(this).attr("snip-lat");
+          const lon = $(this).attr("snip-lon");
 
-        function removeMarker() {
-          if (marker != undefined) {
-            map.removeLayer(marker);
-          }
-          latLongValueEdit();
-        }
+          let container = document.getElementById(`snip_${postId}`);
 
-        function onMapClick(e) {
-          let lat = e.latlng.lat;
-          let lon = e.latlng.lng;
+          switchMapButton(`snip_${postId}`);
 
-          removeMarker();
+          $(`#snip_${postId}`).toggleClass("visually-hidden");
 
-          marker = L.marker([lat, lon]).addTo(map);
-          latLongValueEdit(lat, lon);
-        }
+          let map = getOrCreateMap(`snip_${postId}`, {
+            center: [lat, lon],
+            zoom: 15,
+          });
+          if (!container._leaflet_map) return;
+          L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            maxZoom: 19,
+            attribution:
+              '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+          }).addTo(map);
 
-        map.on("click", onMapClick);
-      }
+          let marker = L.marker([lat, lon]).addTo(map);
+        });
+
+        $(".snipmap-close-btn").on("click", function () {
+          const postId = $(this).attr("data-id");
+          $(`#snip_${postId}`).toggleClass("visually-hidden");
+
+          switchMapButton(`snip_${postId}`);
+
+          deleteMap(`snip_${postId}`);
+        });
+
+        $("[id*='location_snip_']").each((i, postEl) => {
+          let lat = postEl.getAttribute("lat");
+          let lon = postEl.getAttribute("lon");
+
+          const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`;
+
+          setTimeout(() => {
+            fetch(url, {
+              headers: {
+                "User-Agent":
+                  "LDICCodingTest/1.0 (m.arsyad.ikbar.14@gmail.com)",
+              },
+            })
+              .then((res) => {
+                if (!res.ok) throw new Error("Network error");
+                return res.json();
+              })
+              .then((data) => {
+                let addr = data.address || {};
+
+                let city =
+                  addr.city ||
+                  addr.town ||
+                  addr.village ||
+                  addr.hamlet ||
+                  addr.county ||
+                  "Unknown place";
+
+                let country = addr.country || "Unknown country";
+                postEl.textContent = `${city}, ${country}`;
+              })
+              .catch((err) => {
+                console.error("Reverse geocode failed:", err);
+                postEl.textContent = "Location unavailable";
+              });
+          }, i * 500);
+        });
+
+        $(".like-btn").on("click", function () {
+          const postId = $(this).attr("data-id");
+          fetch(`/post/${postId}/like/`, {
+            method: "POST",
+            headers: {
+              "X-CSRFToken": "{{ csrf_token }}",
+              "X-Requested-With": "XMLHttpRequest",
+            },
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              const icon = $(this).find("i");
+
+              $(this).toggleClass("active");
+
+              if ($(this).hasClass("active")) {
+                icon.removeClass("bi-heart").addClass("bi-heart-fill");
+              } else {
+                icon.removeClass("bi-heart-fill").addClass("bi-heart");
+              }
+              $(`#${postId}-like-count`)[0].textContent = data.total_likes;
+            });
+        });
+
+        $(".reply-btn").on("click", function () {
+          const postId = $(this).attr("data-id");
+          $(`#${postId}-repost-div`).slideToggle(300);
+        });
+      });
     </script>
   </body>
 </html>

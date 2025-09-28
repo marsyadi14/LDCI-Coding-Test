@@ -1,72 +1,145 @@
-<div class="p-2 bg-primary-subtle bordered rounded rounded-lg col">
-  <p class="fs-4">"{{ post.post_content }}"</p>
-  <p class="fs-5 fw-semibold">
-    - {{ post.poster_id.display_name }}@{{ post.poster_id.username }}
-  </p>
-  <p>Created at: {{ post.created_at }}</p>
-
-  {% if post.loc_lat %}
-  <p>Latitude: {{ post.loc_lat }}</p>
-  {% endif %} {% if post.loc_lon %}
-  <p>Longitude: {{ post.loc_lon }}</p>
-  {% endif %}
-
-  <div
-    class="d-flex justify-content-center align-items-center mt-3 px-2 text-center"
-  >
-    <button
-      class="col like-btn btn btn-primary"
-      data-id="{{ post.post_id }}"
-      onclick="likeBtnFunc(this)"
+<div class="post border rounded rounded-lg py-3 px-3" style="cursor: default">
+  <div class="d-flex justify-content-between my-1">
+    <span>
+      <span class="fw-bold text-dark">{{ post.poster_id.display_name }}</span>
+      <span class="text-muted">@{{ post.poster_id.username }}</span>
+    </span>
+    <span class="text-muted small"
+      >{{ post.created_at.date }} {{ post.created_at.time|date:"H:i" }}</span
     >
-      <span id="{{ post.post_id }}-like-count"
-        >{{post.liker_id.count}} likes</span
-      >
-    </button>
-    <h6 class="col" id="{{ post.post_id }}-post-count">
-      {{post.repost.count}} reposts
-    </h6>
-
-    <button
-      class="col reply-btn btn btn-primary"
-      data-id="{{ post.post_id }}"
-      onclick="repostBtnFunc(this)"
-    >
-      Reply Post
-    </button>
   </div>
 
-  <div
-    class="d-flex justify-content-center align-items-center mt-3 px-2 text-center"
-  >
-    {% if detailed_post %}
+  <div class="post-text mb-2">{{ post.post_content }}</div>
+
+  {% if post.repost_id and not detailed_repost%}
+  <div class="border border-primary rounded m-1 p-2">
+    <div class="d-flex justify-content-between">
+      <span class="text-muted"
+        ><span class="fw-bold text-dark me-1"
+          >{{ post.repost_id.poster_id.display_name }}</span
+        >@{{post.repost_id.poster_id.username }}
+      </span>
+      <span class="text-muted small">
+        <!-- prettier-ignore -->
+        {{ post.repost_id.created_at.date }} {{ post.repost_id.created_at.time|date:"H:i" }}
+      </span>
+    </div>
+
+    <div class="post-text my-1 ms-2">{{ post.repost_id.post_content }}</div>
+    <div class="d-flex justify-content-between text-muted small action-bar">
+      <button
+        class="btn btn-link p-0 d-flex align-items-center text-decoration-none location-btn"
+        onclick="location.href = '/post/{{ post.repost_id.post_id }}'"
+      >
+        <i class="bi bi-signpost me-1"></i>
+        <span>Visit Repost</span>
+      </button>
+    </div>
+  </div>
+  {% endif %} {% if post.loc_lat %}
+  <div class="text-muted small d-flex align-items-center mb-1">
+    <i class="bi bi-geo-alt me-1"></i>
+    <span
+      id="location_snip_{{post.post_id}}"
+      class="me-1"
+      lat="{{post.loc_lat}}"
+      lon="{{post.loc_lon}}"
+      >Fetching City
+    </span>
+  </div>
+  <div class="d-flex justify-content-between text-muted small action-bar mb-1">
     <button
-      class="col reply-btn btn btn-primary"
-      onclick="location.href = '/post/'"
+      class="btn btn-link p-0 d-flex align-items-center text-decoration-none location-btn snipmap-open-btn"
+      id="select_snip_{{ post.post_id }}"
+      data-id="{{ post.post_id }}"
+      snip-lat="{{post.loc_lat}}"
+      snip-lon="{{post.loc_lon}}"
     >
-      Return
+      <i class="bi bi-map-fill me-1"></i> Show Map
+    </button>
+    <button
+      class="btn btn-link p-0 d-flex align-items-center text-decoration-none location-btn visually-hidden snipmap-close-btn"
+      id="close_snip_{{ post.post_id }}"
+      data-id="{{ post.post_id }}"
+    >
+      <i class="bi bi-map me-1"></i> Close Map
+    </button>
+  </div>
+  <div
+    class="visually-hidden"
+    id="snip_{{post.post_id}}"
+    style="height: 150px"
+  ></div>
+  {% endif %}
+
+  <div class="d-flex justify-content-between text-muted small action-bar">
+    <button
+      class="btn btn-link p-0 d-flex align-items-center text-decoration-none reply-btn"
+      data-id="{{ post.post_id }}"
+    >
+      <i class="bi bi-chat me-1"></i>
+      <span id="{{ post.post_id }}-post-count"> {{post.repost.count}}</span>
+    </button>
+
+    {% if request.user in post.liker_id.all %}
+    <button
+      class="btn btn-link p-0 d-flex align-items-center text-decoration-none like-btn active"
+      data-id="{{ post.post_id }}"
+    >
+      <i class="bi bi-heart-fill me-1"></i>
+      <span id="{{ post.post_id }}-like-count">{{post.liker_id.count}}</span>
     </button>
     {% else %}
     <button
-      class="col reply-btn btn btn-primary"
+      class="btn btn-link p-0 d-flex align-items-center text-decoration-none like-btn"
+      data-id="{{ post.post_id }}"
+    >
+      <i class="bi bi-heart me-1"></i>
+      <span id="{{ post.post_id }}-like-count">{{post.liker_id.count}}</span>
+    </button>
+    {% endif %} {% if not curr_post %}
+    <button
+      class="btn btn-link p-0 d-flex align-items-center text-decoration-none location-btn"
       onclick="location.href = '/post/{{ post.post_id }}'"
     >
-      Visit Post
+      <i class="bi bi-signpost me-1"></i>
+      <span>Visit Post</span>
     </button>
     {% endif %}
   </div>
-</div>
 
-<div id="{{ post.post_id }}-repost-div" style="display: none">
-  <form
-    method="post"
-    class="d-grid justify-content-center align-items-end p-2 bg-primary-subtle bordered rounded"
-  >
-    <!-- prettier-ignore -->
-    {% csrf_token %} {{ form.post_content}}
-    <input type="hidden" name="repost_val" value="{{ post.post_id }}" />
-    <button type="submit" name="repost" class="btn btn-primary mt-2">
-      Repost
-    </button>
-  </form>
+  <div id="{{ post.post_id }}-repost-div" style="display: none">
+    <form
+      method="post"
+      class="d-grid justify-content-center align-items-end p-2 bg-primary-subtle border rounded"
+    >
+      <!-- prettier-ignore -->
+      {% csrf_token %} {{ form.post_content}}
+      <a
+        class="btn btn-primary map-open-btn"
+        id="select_{{ post.post_id }}"
+        data-id="{{ post.post_id }}"
+      >
+        Select Location
+      </a>
+      <a
+        class="btn btn-primary visually-hidden map-close-btn"
+        id="close_{{ post.post_id }}"
+        data-id="{{ post.post_id }}"
+      >
+        Close Map
+      </a>
+      <input type="hidden" id="lat_mymap_{{ post.post_id }}" name="loc_lat" />
+      <input type="hidden" id="lon_mymap_{{ post.post_id }}" name="loc_lon" />
+      <input type="hidden" name="repost_val" value="{{ post.post_id }}" />
+      <button type="submit" name="repost" class="btn btn-primary mt-2">
+        Repost
+      </button>
+    </form>
+    <div
+      class="visually-hidden"
+      id="peta_{{ post.post_id }}"
+      style="height: 200px"
+    ></div>
+  </div>
 </div>
